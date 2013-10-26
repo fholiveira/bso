@@ -1,0 +1,52 @@
+_temp_file="tempf"
+
+function list_dependencies() {
+    local file=$1
+    local dependencies=$(grep ^#import $file | sed -e 's/^#import //' | tr -d ' ')
+
+    for dependency in $dependencies
+    do
+	    echo "$file $dependency" >> $_temp_file
+      
+        list_dependencies $dependency
+    done
+}
+
+function order_files() {
+    local files=$(tsort < $_temp_file | tac)
+    
+    echo "$files"
+}
+
+function minify_script() {
+    local output_file=$1    
+
+    sed '/^$/d' $output_file | cat > $output_file
+}
+
+function generate_script() {
+    local start_file=$1
+    local output_file=$2    
+
+    list_dependencies $start_file
+
+    local files=$(order_files)
+
+    echo '' > $output_file
+
+    echo $files
+
+    for file in $files
+    do
+        sed '/^#import/d' $file | cat >> $output_file
+    done 
+
+    #minify_script $output_file
+}
+
+echo '' > ${_temp_file}
+
+generate_script $@
+
+rm $_temp_file
+
