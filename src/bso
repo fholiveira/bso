@@ -1,0 +1,18 @@
+#import bso_build
+#import bso_run
+
+echo '' > ${_temp_file}
+
+case $1 in 
+    --help )
+        echo "Esta é a ajuda"
+    ;;
+    build )
+        build ${@:2}
+    ;;
+    run )
+        run ${@:2}
+    ;;
+esac
+
+rm $_temp_file
