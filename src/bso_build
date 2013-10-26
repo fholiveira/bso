@@ -1,4 +1,4 @@
-_temp_file="tempf"
+_build_temp_file="tempf"
 _with_symbols=false
 _output_file=""
 
@@ -6,23 +6,23 @@ function list_dependencies() {
     local file=$1
     local dependencies=$(grep ^#import $file | sed -e 's/^#import //' | tr -d ' ')
 
-    for dependency in $dependencies
+    for dependency in "$dependencies"
     do
-	    echo "$file $dependency" >> $_temp_file
+	    echo "$file $dependency" >> $_build_temp_file
       
         list_dependencies $dependency
     done
 }
 
 function order_files() {
-    local files=$(tsort < $_temp_file | tac)
+    local files=$(tsort < $_build_temp_file | tac)
     
     echo "$files"
 }
 
 function minify_script() { 
-    sed -e '/^#import/d' $_output_file -e '/^#file=/d' -e '/^$/d' | cat > "__${_output_file}__"
-    mv "__${_output_file}__" ${_output_file}
+    sed -e '/^#import/d' $_output_file -e '/^#file=/d' -e '/^$/d' | cat > ${_build_temp_file}
+    mv ${_build_temp_file} ${_output_file}
 }
 
 function generate_script() {
@@ -49,6 +49,8 @@ function build() {
     local start_file=$1
     local name=1
 
+    echo '' > ${_build_temp_file}
+
     for i in $*
     do 
         name=$(($name + 1))
@@ -65,12 +67,6 @@ function build() {
 
     generate_script $start_file 
 }
-
-echo '' > ${_temp_file}
-
-build $@
-
-rm ${_temp_file}
 
 
 

@@ -1,1 +1,49 @@
-build $1 --with-symbols
+#import bso_build
+
+_run_temp_file="tempb"
+
+function build_temp_script() {
+    start_script=$1
+    build $start_script -o $_run_temp_file --with-symbols
+}
+
+function link_error() {
+    error=$1
+
+    local number=$(echo "$error" | grep -oP "line [0-9]" | sed 's/line //')
+    local file_header=$(head -$number "$_run_temp_file" | grep '^#file=' | tail -1)
+    local file=$(echo "$file_header" | sed 's/#file=//')
+    local file_line_number=$(grep -n "$file_header" $_run_temp_file | cut -d: -f1)
+
+    echo $number $file_header $file $file_line_number
+}
+
+function show_script_output() {
+    script_result = $1
+
+    for line in "$script_result" ; do
+        if [[ $line =~ "^${_run_temp_file}" ]] ; then
+            link_error $line | echo
+        else
+            echo $line
+        fi
+    done
+}
+
+function run() {
+    start_script=$1    
+
+    echo '' > ${_run_temp_file}
+
+    build_temp_script $start_script
+
+    local script_result=$(bash $_run_temp_file $@ 2 > &1)
+    local exit_code=$?
+
+    if [ "$exit_code" != "0" ] ; then
+        show_script_output $script_result
+    else
+        echo "$script_result"
+    fi
+#rm ${_run_temp_file}
+}
