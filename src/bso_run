@@ -1,5 +1,3 @@
-#import bso_build
-
 _run_temp_file="tempb"
 
 function build_temp_script() {
@@ -15,35 +13,30 @@ function link_error() {
     local file=$(echo "$file_header" | sed 's/#file=//')
     local file_line_number=$(grep -n "$file_header" $_run_temp_file | cut -d: -f1)
 
-    echo $number $file_header $file $file_line_number
+    error=${error/"$_run_temp_file:"/"$file:"}
+    error=${error/"line $number:"/"line $file_line_number:"}
+
+    echo "$error"
 }
 
 function show_script_output() {
-    script_result = $1
+    script_result=$1
 
-    for line in "$script_result" ; do
-        if [[ $line =~ "^${_run_temp_file}" ]] ; then
-            link_error $line | echo
+    while read -r line; do
+        if [[ "$line" =~ ^$_run_temp_file:.* ]] ; then
+            local error=$(link_error "$line")
+            echo "$error" 
         else
-            echo $line
+            echo "$line"
         fi
-    done
+    done <<< "$script_result"
 }
 
 function run() {
     start_script=$1    
 
-    echo '' > ${_run_temp_file}
-
     build_temp_script $start_script
 
-    local script_result=$(bash $_run_temp_file $@ 2 > &1)
-    local exit_code=$?
-
-    if [ "$exit_code" != "0" ] ; then
-        show_script_output $script_result
-    else
-        echo "$script_result"
-    fi
-#rm ${_run_temp_file}
+    local result=$(bash $_run_temp_file $@ 2>&1)
+    show_script_output "$result"
 }

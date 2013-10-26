@@ -6,7 +6,7 @@ function list_dependencies() {
     local file=$1
     local dependencies=$(grep ^#import $file | sed -e 's/^#import //' | tr -d ' ')
 
-    for dependency in "$dependencies"
+    for dependency in $dependencies
     do
 	    echo "$file $dependency" >> $_build_temp_file
       
@@ -21,7 +21,7 @@ function order_files() {
 }
 
 function minify_script() { 
-    sed -e '/^#import/d' $_output_file -e '/^#file=/d' -e '/^$/d' | cat > ${_build_temp_file}
+    sed -e '/^#import/d' $_output_file -e '/^#file=/d' -e '/^$/d' | cat > ${_build_temp_file} 
     mv ${_build_temp_file} ${_output_file}
 }
 
@@ -49,8 +49,6 @@ function build() {
     local start_file=$1
     local name=1
 
-    echo '' > ${_build_temp_file}
-
     for i in $*
     do 
         name=$(($name + 1))
@@ -67,7 +65,6 @@ function build() {
 
     generate_script $start_file 
 }
-
 
 
 
