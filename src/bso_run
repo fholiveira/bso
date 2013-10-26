@@ -1,4 +1,5 @@
-_run_temp_file="tempb"
+#import global_variables
+#import bso_build
 
 function build_temp_script() {
     start_script=$1

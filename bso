@@ -1,4 +1,5 @@
-_build_temp_file="tempf"
+_build_temp_file="tempr"
+_run_temp_file="tempb"
 _with_symbols=false
 _output_file=""
 function list_dependencies() {
@@ -51,7 +52,6 @@ function build() {
     done
     generate_script $start_file 
 }
-_run_temp_file="tempb"
 function build_temp_script() {
     start_script=$1
     build $start_script -o $_run_temp_file --with-symbols

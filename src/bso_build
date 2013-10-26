@@ -1,6 +1,4 @@
-_build_temp_file="tempf"
-_with_symbols=false
-_output_file=""
+#import global_variables
 
 function list_dependencies() {
     local file=$1
