@@ -6,6 +6,11 @@ function build_temp_script() {
     build $start_script -o $_run_temp_file --with-symbols
 }
 
+function run_temp_script() {
+    local result=$(bash $_run_temp_file $@ 2>&1)
+    echo "$result"
+}
+
 function link_error() {
     error=$1
 
@@ -36,8 +41,6 @@ function show_script_output() {
 function run() {
     start_script=$1    
 
-    build_temp_script $start_script
-
-    local result=$(bash $_run_temp_file $@ 2>&1)
-    show_script_output "$result"
+    build_temp_script "$start_script"
+    show_script_output "$(run_temp_script)"
 }

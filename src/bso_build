@@ -61,7 +61,7 @@ function build() {
         esac
     done
 
-    generate_script $start_file 
+    generate_script "$start_file" 
 }
 
 
