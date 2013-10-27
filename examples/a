@@ -1,7 +1,7 @@
 echo "Script A"
 
 function do_something() {
-    echo "'do_something' defined in A file"
+    echo "This command is defined in A file"
 }
 
 

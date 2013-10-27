@@ -3,6 +3,11 @@
 echo "Script B"
 
 echo "Running something in A script:"
-CCCCCCCC
+
 do_something
 
+echo "The next line will throw an error..."
+
+aaaa_bbbb_cccc
+
+echo "That's all folks!" 
