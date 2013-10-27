@@ -20,6 +20,10 @@ Baixe o script [bso](bso) e o coloque em ~/bin.
   
   bso run b
 
+* Obter um relatório de erros na execução de um script
+  
+  bso run b --error-report
+
 * Gerar script final para distribuição
 
   bso build b -o final_script
