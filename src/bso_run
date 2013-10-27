@@ -7,8 +7,7 @@ function build_temp_script() {
 }
 
 function run_temp_script() {
-    local result=$(bash $_run_temp_file $@ 2>&1)
-    echo "$result"
+    bash $_run_temp_file $@ 2>&1
 }
 
 function link_error() {

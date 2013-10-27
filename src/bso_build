@@ -11,9 +11,14 @@ function append_item() {
     fi    
 }
 
+function get_dependencies_name() {
+    file=$1
+    grep ^#import $file | sed -e 's/^#import //' | tr -d ' '
+}
+
 function list_dependencies() {
     local file=$1
-    local dependencies=$(grep ^#import $file | sed -e 's/^#import //' | tr -d ' ')
+    local dependencies=$(get_dependencies_name $file)
 
     for dependency in $dependencies ; do
 	    _graph=$(append_item "$_graph" "$file $dependency")
@@ -22,8 +27,7 @@ function list_dependencies() {
 }
 
 function order_files() {
-    local files=$(echo $_graph | tsort | tac)
-    echo "$files"
+    echo $_graph | tsort | tac
 }
 
 function minify_script() { 
