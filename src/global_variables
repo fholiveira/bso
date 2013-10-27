@@ -1,7 +1,7 @@
 _temp_script="tempb"
 _with_symbols=false
 _script=""
-_graph=""
+_dependency_list=""
 
 #Symbols
 _import_symbol='#import'

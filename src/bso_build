@@ -24,13 +24,13 @@ function list_dependencies() {
     local dependencies=$(get_dependencies_name $file)
 
     for dependency in $dependencies ; do
-	    _graph=$(append_item "$_graph" "$file $dependency")
+	    _dependency_list=$(append_item "$_dependency_list" "$file $dependency")
         list_dependencies $dependency
     done
 }
 
 function order_files() {
-    echo $_graph | tsort | tac
+    echo $_dependency_list | tsort | tac
 }
 
 function minify_script() { 
@@ -49,19 +49,27 @@ function prepare_final_script_file() {
     touch $_script
 }
 
-function generate_script() {
-    local start_file=$1
-
-    list_dependencies $start_file
-
+function merge_scripts() {
     local files=$(order_files)
-
-    prepare_final_script_file
 
     for file in $files ; do
         echo "${_file_symbol}${file}" >> $_script
         cat $file >> $_script
-    done 
+    done
+}
+
+function generate_script() {
+    local start_file=$1
+
+    prepare_final_script_file
+
+    list_dependencies $start_file
+
+    if [ -z $_dependency_list ] ; then
+        cat $start_file > $_script
+    else
+        merge_scripts
+    fi
 
     if ! $_with_symbols ; then
         minify_script
