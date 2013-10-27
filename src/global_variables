@@ -1,6 +1,6 @@
-_run_temp_file="tempb"
+_temp_script="tempb"
 _with_symbols=false
-_output_file=""
+_script=""
 _graph=""
 
 #Symbols

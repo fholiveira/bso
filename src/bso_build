@@ -38,15 +38,15 @@ function minify_script() {
     local remove_file_start="/^${_file_symbol}/d"
     local remove_empty_lines='/^$/d'
 
-    sed -i -e $remove_imports -e $remove_file_start -e $remove_empty_lines $_output_file
+    sed -i -e $remove_imports -e $remove_file_start -e $remove_empty_lines $_script
 }
 
 function prepare_final_script_file() {
-    if [ -f $_output_file ] ; then
-        rm $_output_file
+    if [ -f $_script ] ; then
+        rm $_script
     fi
     
-    touch $_output_file
+    touch $_script
 }
 
 function generate_script() {
@@ -59,8 +59,8 @@ function generate_script() {
     prepare_final_script_file
 
     for file in $files ; do
-        echo "${_file_symbol}${file}" >> $_output_file
-        cat $file >> $_output_file
+        echo "${_file_symbol}${file}" >> $_script
+        cat $file >> $_script
     done 
 
     if ! $_with_symbols ; then
@@ -81,7 +81,7 @@ function build() {
             ;;
 
             --output | -o )
-                _output_file=$(eval "echo \$${name}")
+                _script=$(eval "echo \$${name}")
             ;;
         esac
     done

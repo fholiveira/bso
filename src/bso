@@ -10,11 +10,11 @@ case $1 in
         build ${@:2}
     ;;
     run )
-        echo '' > ${_run_temp_file}
+        echo '' > ${_temp_script}
         run ${@:2}
     ;;
 esac
 
-#if [ -f ${_run_temp_file} ] ; then
-    #rm ${_run_temp_file}
-#fi
+if [ -f ${_temp_script} ] ; then
+    rm ${_temp_script}
+fi

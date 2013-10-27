@@ -3,11 +3,11 @@
 
 function build_temp_script() {
     local start_script=$1
-    build $start_script -o $_run_temp_file --with-symbols
+    build $start_script -o $_temp_script --with-symbols
 }
 
 function run_temp_script() {
-    bash $_run_temp_file $@ 2>&1
+    bash $_temp_script $@ 2>&1
 }
 
 function get_error_line() {
@@ -18,7 +18,7 @@ function get_error_line() {
 function get_file_start_symbol() {
     local line_number=$1
     local search_file_symbol="^${_file_symbol}"
-    head -$line_number "$_run_temp_file" | grep "$search_file_symbol" | tail -1
+    head -$line_number "$_temp_script" | grep "$search_file_symbol" | tail -1
 }
 
 function get_file_name() {
@@ -29,7 +29,7 @@ function get_file_name() {
 
 function get_file_line_number() {
     local file_symbol=$1
-    grep -n "$file_symbol" $_run_temp_file | cut -d: -f1
+    grep -n "$file_symbol" $_temp_script | cut -d: -f1
 }
 
 function link_error() {
@@ -42,7 +42,7 @@ function link_error() {
     local header_line=$(get_file_line_number $file_symbol)
     local file_line_number=$(($line_number - $header_line))
 
-    error=${error/"$_run_temp_file:"/"$file_name:"}
+    error=${error/"$_temp_script:"/"$file_name:"}
     error=${error/"line $line_number:"/"line $file_line_number:"}
 
     echo "$error"
@@ -52,7 +52,7 @@ function show_script_output() {
     local script_result=$1
 
     while read -r line; do
-        if [[ "$line" =~ ^$_run_temp_file:.* ]] ; then
+        if [[ "$line" =~ ^$_temp_script:.* ]] ; then
             link_error "$line"
         else
             echo "$line"
