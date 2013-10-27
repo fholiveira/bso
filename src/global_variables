@@ -2,3 +2,4 @@ _build_temp_file="tempr"
 _run_temp_file="tempb"
 _with_symbols=false
 _output_file=""
+_graph=""

@@ -1,20 +1,28 @@
 #import global_variables
 
+function append_item() {
+    list=$1
+    item=$2
+    
+    if [ -z $list ] ; then
+        echo "$item"
+    else
+        echo "$list\n$item"
+    fi    
+}
+
 function list_dependencies() {
     local file=$1
     local dependencies=$(grep ^#import $file | sed -e 's/^#import //' | tr -d ' ')
 
-    for dependency in $dependencies
-    do
-	    echo "$file $dependency" >> $_build_temp_file
-      
+    for dependency in $dependencies ; do
+	    _graph=$(append_item "$_graph" "$file $dependency")
         list_dependencies $dependency
     done
 }
 
 function order_files() {
-    local files=$(tsort < $_build_temp_file | tac)
-    
+    local files=$(echo $_graph | tsort | tac)
     echo "$files"
 }
 
