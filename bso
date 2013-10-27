@@ -1,36 +1,66 @@
-_build_temp_file="tempr"
-_run_temp_file="tempb"
+_temp_script="tempb"
 _with_symbols=false
-_output_file=""
+_script=""
+_dependency_list=""
+#Symbols
+_import_symbol='#import'
+_file_symbol='#file='
+function append_item() {
+    local list=$1
+    local item=$2
+    
+    if [ -z $list ] ; then
+        echo "$item"
+    else
+        echo "$list\n$item"
+    fi    
+}
+function get_dependencies_name() {
+    local file=$1
+    local search_imports="^${_import_symbol}"
+    local remove_import="s/^${_import_symbol} //"
+    grep $search_imports $file | sed -e "$remove_import" | tr -d ' '
+}
 function list_dependencies() {
     local file=$1
-    local dependencies=$(grep ^#import $file | sed -e 's/^#import //' | tr -d ' ')
-    for dependency in $dependencies
-    do
-	    echo "$file $dependency" >> $_build_temp_file
-      
+    local dependencies=$(get_dependencies_name $file)
+    for dependency in $dependencies ; do
+	    _dependency_list=$(append_item "$_dependency_list" "$file $dependency")
         list_dependencies $dependency
     done
 }
 function order_files() {
-    local files=$(tsort < $_build_temp_file | tac)
-    
-    echo "$files"
+    echo $_dependency_list | tsort | tac
 }
 function minify_script() { 
-    sed -e '/^#import/d' $_output_file -e '/^#file=/d' -e '/^$/d' | cat > ${_build_temp_file} 
-    mv ${_build_temp_file} ${_output_file}
+    local remove_imports="/^${_import_symbol}/d"
+    local remove_file_start="/^${_file_symbol}/d"
+    local remove_empty_lines='/^$/d'
+    sed -i -e $remove_imports -e $remove_file_start -e $remove_empty_lines $_script
+}
+function prepare_final_script_file() {
+    if [ -f $_script ] ; then
+        rm $_script
+    fi
+    
+    touch $_script
+}
+function merge_scripts() {
+    local files=$(order_files)
+    for file in $files ; do
+        echo "${_file_symbol}${file}" >> $_script
+        cat $file >> $_script
+    done
 }
 function generate_script() {
     local start_file=$1
+    prepare_final_script_file
     list_dependencies $start_file
-    local files=$(order_files)
-    echo '' > $_output_file
-    for file in $files
-    do
-        echo "#file=$file" >> $_output_file
-        cat $file >> $_output_file
-    done 
+    if [ -z $_dependency_list ] ; then
+        cat $start_file > $_script
+    else
+        merge_scripts
+    fi
     if ! $_with_symbols ; then
         minify_script
     fi
@@ -46,59 +76,75 @@ function build() {
                 _with_symbols=true
             ;;
             --output | -o )
-                _output_file=$(eval "echo \$${name}")
+                _script=$(eval "echo \$${name}")
             ;;
         esac
     done
-    generate_script $start_file 
+    generate_script "$start_file" 
 }
 function build_temp_script() {
-    start_script=$1
-    build $start_script -o $_run_temp_file --with-symbols
+    local start_script=$1
+    build $start_script -o $_temp_script --with-symbols
+}
+function run_temp_script() {
+    bash $_temp_script $@ 2>&1
+}
+function get_error_line() {
+    local error=$1
+    echo "$error" | grep -oP "line [0-9]*" | sed 's/line //'
+}
+function get_file_start_symbol() {
+    local line_number=$1
+    local search_file_symbol="^${_file_symbol}"
+    head -$line_number "$_temp_script" | grep "$search_file_symbol" | tail -1
+}
+function get_file_name() {
+    local file_symbol=$1
+    local remove_symbol="s/${_file_symbol}//"
+    echo "$file_symbol" | sed $remove_symbol
+}
+function get_file_line_number() {
+    local file_symbol=$1
+    grep -n "$file_symbol" $_temp_script | cut -d: -f1
 }
 function link_error() {
-    error=$1
-    local number=$(echo "$error" | grep -oP "line [0-9]" | sed 's/line //')
-    local file_header=$(head -$number "$_run_temp_file" | grep '^#file=' | tail -1)
-    local file=$(echo "$file_header" | sed 's/#file=//')
-    local file_line_number=$(grep -n "$file_header" $_run_temp_file | cut -d: -f1)
-    error=${error/"$_run_temp_file:"/"$file:"}
-    error=${error/"line $number:"/"line $file_line_number:"}
+    local error=$1
+    local line_number=$(get_error_line "$error")
+    local file_symbol=$(get_file_start_symbol $line_number)
+    local file_name=$(get_file_name $file_symbol)
+    local header_line=$(get_file_line_number $file_symbol)
+    local file_line_number=$(($line_number - $header_line))
+    error=${error/"$_temp_script:"/"$file_name:"}
+    error=${error/"line $line_number:"/"line $file_line_number:"}
     echo "$error"
 }
 function show_script_output() {
-    script_result=$1
+    local script_result=$1
     while read -r line; do
-        if [[ "$line" =~ ^$_run_temp_file:.* ]] ; then
-            local error=$(link_error "$line")
-            echo "$error" 
+        if [[ "$line" =~ ^$_temp_script:.* ]] ; then
+            link_error "$line"
         else
             echo "$line"
         fi
     done <<< "$script_result"
 }
 function run() {
-    start_script=$1    
-    build_temp_script $start_script
-    local result=$(bash $_run_temp_file $@ 2>&1)
-    show_script_output "$result"
+    local start_script=$1    
+    build_temp_script "$start_script"
+    show_script_output "$(run_temp_script)"
 }
 case $1 in 
     --help )
         echo "Esta é a ajuda"
     ;;
     build )
-        echo '' > ${_build_temp_file}
         build ${@:2}
     ;;
     run )
-        echo '' > ${_run_temp_file}
+        echo '' > ${_temp_script}
         run ${@:2}
     ;;
 esac
-if [ -f ${_build_temp_file} ] ; then
-    rm ${_build_temp_file}
-fi
-if [ -f ${_run_temp_file} ] ; then
-    rm ${_run_temp_file}
+if [ -f ${_temp_script} ] ; then
+    rm ${_temp_script}
 fi
