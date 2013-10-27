@@ -1,5 +1,6 @@
 _temp_script="tempb"
 _with_symbols=false
+_error_report=false
 _script=""
 _dependency_list=""
 

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd ../src/
+../bso build bso -o ../teste 
+chmod +x ../teste 
+cd ../examples/
+
+echo "Pronto!"
+

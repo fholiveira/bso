@@ -4,10 +4,10 @@ function append_item() {
     local list=$1
     local item=$2
     
-    if [ -z $list ] ; then
+    if [ -z "$list" ] ; then
         echo "$item"
     else
-        echo "$list\n$item"
+        echo -e "$list\n$item"
     fi    
 }
 
@@ -65,7 +65,7 @@ function generate_script() {
 
     list_dependencies $start_file
 
-    if [ -z $_dependency_list ] ; then
+    if [ -z "$_dependency_list" ] ; then
         cat $start_file > $_script
     else
         merge_scripts

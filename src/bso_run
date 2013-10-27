@@ -1,4 +1,5 @@
 #import global_variables
+#import bso_output
 #import bso_build
 
 function build_temp_script() {
@@ -10,59 +11,21 @@ function run_temp_script() {
     bash $_temp_script $@ 2>&1
 }
 
-function get_error_line() {
-    local error=$1
-    echo "$error" | grep -oP "line [0-9]*" | sed 's/line //'
-}
-
-function get_file_start_symbol() {
-    local line_number=$1
-    local search_file_symbol="^${_file_symbol}"
-    head -$line_number "$_temp_script" | grep "$search_file_symbol" | tail -1
-}
-
-function get_file_name() {
-    local file_symbol=$1
-    local remove_symbol="s/${_file_symbol}//"
-    echo "$file_symbol" | sed $remove_symbol
-}
-
-function get_file_line_number() {
-    local file_symbol=$1
-    grep -n "$file_symbol" $_temp_script | cut -d: -f1
-}
-
-function link_error() {
-    local error=$1
-
-    local line_number=$(get_error_line "$error")
-    local file_symbol=$(get_file_start_symbol $line_number)
-
-    local file_name=$(get_file_name $file_symbol)
-    local header_line=$(get_file_line_number $file_symbol)
-    local file_line_number=$(($line_number - $header_line))
-
-    error=${error/"$_temp_script:"/"$file_name:"}
-    error=${error/"line $line_number:"/"line $file_line_number:"}
-
-    echo "$error"
-}
-
-function show_script_output() {
-    local script_result=$1
-
-    while read -r line; do
-        if [[ "$line" =~ ^$_temp_script:.* ]] ; then
-            link_error "$line"
-        else
-            echo "$line"
-        fi
-    done <<< "$script_result"
-}
-
 function run() {
-    local start_script=$1    
+    local start_script=$1  
+
+    case $2 in 
+        --error-report )
+            _error_report=true
+        ;;
+    esac  
 
     build_temp_script "$start_script"
-    show_script_output "$(run_temp_script)"
+    script_output=$(run_temp_script)
+
+    if ! $_error_report ; then
+        show_script_output "$script_output"
+    else
+        show_error_report "$script_output"
+    fi
 }
