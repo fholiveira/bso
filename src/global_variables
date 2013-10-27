@@ -1,5 +1,9 @@
-_build_temp_file="tempr"
 _run_temp_file="tempb"
 _with_symbols=false
 _output_file=""
 _graph=""
+
+#Symbols
+_import_symbol='#import'
+_file_symbol='#file='
+

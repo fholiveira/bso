@@ -7,7 +7,6 @@ case $1 in
         echo "Esta é a ajuda"
     ;;
     build )
-        echo '' > ${_build_temp_file}
         build ${@:2}
     ;;
     run )
@@ -16,10 +15,6 @@ case $1 in
     ;;
 esac
 
-if [ -f ${_build_temp_file} ] ; then
-    rm ${_build_temp_file}
-fi
-
-if [ -f ${_run_temp_file} ] ; then
-    rm ${_run_temp_file}
-fi
+#if [ -f ${_run_temp_file} ] ; then
+    #rm ${_run_temp_file}
+#fi

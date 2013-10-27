@@ -1,8 +1,8 @@
 #import global_variables
 
 function append_item() {
-    list=$1
-    item=$2
+    local list=$1
+    local item=$2
     
     if [ -z $list ] ; then
         echo "$item"
@@ -12,8 +12,11 @@ function append_item() {
 }
 
 function get_dependencies_name() {
-    file=$1
-    grep ^#import $file | sed -e 's/^#import //' | tr -d ' '
+    local file=$1
+    local search_imports="^${_import_symbol}"
+    local remove_import="s/^${_import_symbol} //"
+
+    grep $search_imports $file | sed -e "$remove_import" | tr -d ' '
 }
 
 function list_dependencies() {
@@ -31,8 +34,19 @@ function order_files() {
 }
 
 function minify_script() { 
-    sed -e '/^#import/d' $_output_file -e '/^#file=/d' -e '/^$/d' | cat > ${_build_temp_file} 
-    mv ${_build_temp_file} ${_output_file}
+    local remove_imports="/^${_import_symbol}/d"
+    local remove_file_start="/^${_file_symbol}/d"
+    local remove_empty_lines='/^$/d'
+
+    sed -i -e $remove_imports -e $remove_file_start -e $remove_empty_lines $_output_file
+}
+
+function prepare_final_script_file() {
+    if [ -f $_output_file ] ; then
+        rm $_output_file
+    fi
+    
+    touch $_output_file
 }
 
 function generate_script() {
@@ -42,11 +56,10 @@ function generate_script() {
 
     local files=$(order_files)
 
-    echo '' > $_output_file
+    prepare_final_script_file
 
-    for file in $files
-    do
-        echo "#file=$file" >> $_output_file
+    for file in $files ; do
+        echo "${_file_symbol}${file}" >> $_output_file
         cat $file >> $_output_file
     done 
 
