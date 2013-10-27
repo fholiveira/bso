@@ -1,0 +1,6 @@
+#import a
+
+echo "Script B"
+
+echo "Running something in A script:"
+do_something

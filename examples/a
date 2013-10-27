@@ -1,0 +1,7 @@
+echo "Script A"
+
+function do_something() {
+    echo "'do_something' defined in A file"
+}
+
+
