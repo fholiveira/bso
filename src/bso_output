@@ -1,32 +1,5 @@
 #import global_variables
-
-function get_error_line() {
-    local error=$1
-    echo "$error" | grep -oP "line [0-9]*" | sed 's/line //'
-}
-
-function get_file_start_symbol() {
-    local line_number=$1
-    local search_file_symbol="^${_file_symbol}"
-    head -$line_number "$_temp_script" | grep "$search_file_symbol" | tail -1
-}
-
-function get_file_name() {
-    local file_symbol=$1
-    local remove_symbol="s/${_file_symbol}//"
-    echo "$file_symbol" | sed $remove_symbol
-}
-
-function get_file_line_number() {
-    local file_symbol=$1
-    grep -n "$file_symbol" $_temp_script | cut -d: -f1
-}
-
-function get_error_message() {
-    local error=$1
-    local remove_error_head="s/^.*[0-9]://"
-    echo "$error" | sed $remove_error_head
-}
+#import bso_errors
 
 function print_line() {
     printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
