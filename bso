@@ -5,7 +5,7 @@ _script=""
 _dependency_list=""
 #Symbols
 _import_symbol='#import'
-_file_symbol='#file='
+_file_symbol='#filestart='
 function get_error_line() {
     local error=$1
     echo "$error" | grep -oP "line [0-9]*" | sed 's/line //'
@@ -24,6 +24,11 @@ function get_file_line_number() {
     local file_symbol=$1
     grep -n "$file_symbol" $_temp_script | cut -d: -f1
 }
+function get_error_message() {
+    local error=$1
+    local remove_error_head="s/^.*[0-9]://"
+    echo "$error" | sed $remove_error_head
+}
 function print_line() {
     printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 }
@@ -39,7 +44,7 @@ function show_error() {
     local error=$1
     local file_name=$2
     local file_line_number=$3
-    local message=$(echo "$error" | cut -d ':' -f4)
+    local message=$(get_error_message "$error")
     echo "File: $file_name"
     echo "Line: $file_line_number"   
     echo "Message: $message"
@@ -159,7 +164,10 @@ function build() {
             ;;
         esac
     done
-    generate_script "$start_file" 
+    local directory=$(dirname "$start_file")
+    local filename=$(basename "$start_file")
+    cd $directory
+    generate_script "$filename" 
 }
 function build_temp_script() {
     local start_script=$1
@@ -182,6 +190,9 @@ function run() {
     else
         show_error_report "$script_output"
     fi
+    if [ -f ${_temp_script} ] ; then
+        rm ${_temp_script}
+    fi
 }
 case $1 in 
     --help )
@@ -191,10 +202,6 @@ case $1 in
         build ${@:2}
     ;;
     run )
-        echo '' > ${_temp_script}
         run ${@:2}
     ;;
 esac
-if [ -f ${_temp_script} ] ; then
-    rm ${_temp_script}
-fi
