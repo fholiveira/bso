@@ -4,6 +4,7 @@
 
 function build_temp_script() {
     local start_script=$1
+
     build $start_script -o $_temp_script --with-symbols
 }
 
@@ -27,5 +28,9 @@ function run() {
         show_script_output "$script_output"
     else
         show_error_report "$script_output"
+    fi
+
+    if [ -f ${_temp_script} ] ; then
+        rm ${_temp_script}
     fi
 }

@@ -94,7 +94,11 @@ function build() {
         esac
     done
 
-    generate_script "$start_file" 
+    local directory=$(dirname "$start_file")
+    local filename=$(basename "$start_file")
+
+    cd $directory
+    generate_script "$filename" 
 }
 
 

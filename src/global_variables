@@ -6,5 +6,5 @@ _dependency_list=""
 
 #Symbols
 _import_symbol='#import'
-_file_symbol='#file='
+_file_symbol='#filestart='
 
