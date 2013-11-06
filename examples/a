@@ -4,4 +4,6 @@ function do_something() {
     echo "This command is defined in A file"
 }
 
+echo "Running script A"
+
 
