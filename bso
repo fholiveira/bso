@@ -89,6 +89,58 @@ function show_error_report() {
         done <<< "$errors"
     fi
 }
+function command_not_fount() {
+    echo "Command '$1' not found!"
+}
+function file_not_fount() {
+    echo "File '$1' not found!"
+}
+function output_required() {
+   echo 'You must specify a output script'
+}
+function full_help() {
+    cat << EOF
+Bash Script Organizer
+ 
+Usage:
+    bso build <file> (-o | --output) <output_file> [--with-symbols] 
+    bso run <file> [--error-report]
+    bso [build | run] -h | --help
+ 
+Options:
+    -o <file>, --output <file>      Set the output file
+    --with-symbols                  Keep the debug symbols in the output file
+    --error-report                  Show an error report of script execution
+    -h, --help                      Show this help
+EOF
+}
+function builder_help() {
+    cat << EOF
+Bash Script Organizer Builder
+ 
+Usage:
+    bso build <file> (-o | --output) <output_file> [--with-symbols] 
+    bso build -h | --help
+ 
+Options:
+    -o <file>, --output <file>      Set the output file
+    --with-symbols                  Keep the debug symbols in the output file
+    -h, --help                      Show this help
+EOF
+}
+function runner_help() {
+    cat << EOF
+Bash Script Organizer Runner
+ 
+Usage:
+    bso run <file> [--error-report]
+    bso run -h | --help
+ 
+Options:
+    --error-report                  Show an error report of script execution
+    -h, --help                      Show this help
+EOF
+}
 function append_item() {
     local list=$1
     local item=$2
@@ -152,6 +204,7 @@ function generate_script() {
 function build() {
     local start_file=$1
     local name=1
+    test -z "$start_file" && builder_help && exit 0
     for i in $*
     do 
         name=$(($name + 1))
@@ -162,8 +215,21 @@ function build() {
             --output | -o )
                 _script=$(eval "echo \$${name}")
             ;;
+            
+            --help | -h )
+                builder_help
+                exit 0
+            ;;
+            * )
+                if [ "$i" != "$start_file" ] && [ "$i" != "$_script" ] ; then
+                    command_not_fount "$i"
+                    exit 0
+                fi
+            ;;
         esac
     done
+    test ! -f "$start_file" && file_not_fount "$start_file" && exit 0
+    test -z "$_script" && output_required && exit 0
     local directory=$(dirname "$start_file")
     local filename=$(basename "$start_file")
     cd $directory
@@ -177,10 +243,27 @@ function run_temp_script() {
     bash $_temp_script $@ 2>&1
 }
 function run() {
-    local start_script=$1  
+    local start_script=''
+    case $1 in
+        --help | -h )
+            runner_help
+            exit 0
+        ;;
+        * )
+            test -z "$1" && runner_help && exit 0
+            test ! -f "$1" && echo file_not_found "$1" && exit 0
+            start_script="$1"
+        ;;
+    esac
     case $2 in 
         --error-report )
             _error_report=true
+        ;;
+        '' )
+        ;;
+        * )
+            command_not_fount "$2"
+            exit 0
         ;;
     esac  
     build_temp_script "$start_script"
@@ -195,13 +278,13 @@ function run() {
     fi
 }
 case $1 in 
-    --help )
-        echo "Esta é a ajuda"
-    ;;
     build )
         build ${@:2}
     ;;
     run )
         run ${@:2}
     ;;
+    * )
+        full_help
+    ;;    
 esac
