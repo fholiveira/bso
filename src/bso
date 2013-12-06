@@ -1,7 +1,7 @@
 #import global_variables
-#import bso_build
-#import bso_run
-#import bso_help
+#import build
+#import run
+#import help
 
 case $1 in 
     build )

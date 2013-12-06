@@ -1,5 +1,5 @@
 #import global_variables
-#import bso_errors
+#import errors
 
 function print_line() {
     printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -73,4 +73,16 @@ function show_error_report() {
             link_error "$line"
         done <<< "$errors"
     fi
+}
+
+function command_not_fount() {
+    echo "Command '$1' not found!"
+}
+
+function file_not_fount() {
+    echo "File '$1' not found!"
+}
+
+function output_required() {
+   echo 'You must specify a output script'
 }

@@ -1,5 +1,6 @@
 #import global_variables
-#import bso_help
+#import output
+#import help
 
 function append_item() {
     local list=$1
@@ -102,15 +103,15 @@ function build() {
 
             * )
                 if [ "$i" != "$start_file" ] && [ "$i" != "$_script" ] ; then
-                    echo "Command '$i' not found"
+                    command_not_fount "$i"
                     exit 0
                 fi
             ;;
         esac
     done
 
-    test ! -f "$start_file" && echo "File '$start_file' not found" && exit 0
-    test -z "$_script" && echo 'You must specify a output script' && exit 0
+    test ! -f "$start_file" && file_not_fount "$start_file" && exit 0
+    test -z "$_script" && output_required && exit 0
 
     local directory=$(dirname "$start_file")
     local filename=$(basename "$start_file")
