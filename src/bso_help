@@ -1,0 +1,45 @@
+function full_help() {
+    cat << EOF
+Bash Script Organizer
+ 
+Usage:
+    bso build <file> (-o | --output) <output_file> [--with-symbols] 
+    bso run <file> [--error-report]
+    bso [build | run] -h | --help
+ 
+Options:
+    -o <file>, --output <file>      Set the output file
+    --with-symbols                  Keep the debug symbols in the output file
+    --error-report                  Show an error report of script execution
+    -h, --help                      Show this help
+EOF
+}
+
+function builder_help() {
+    cat << EOF
+Bash Script Organizer Builder
+ 
+Usage:
+    bso build <file> (-o | --output) <output_file> [--with-symbols] 
+    bso build -h | --help
+ 
+Options:
+    -o <file>, --output <file>      Set the output file
+    --with-symbols                  Keep the debug symbols in the output file
+    -h, --help                      Show this help
+EOF
+}
+
+function runner_help() {
+    cat << EOF
+Bash Script Organizer Runner
+ 
+Usage:
+    bso run <file> [--error-report]
+    bso run -h | --help
+ 
+Options:
+    --error-report                  Show an error report of script execution
+    -h, --help                      Show this help
+EOF
+}

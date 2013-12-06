@@ -1,15 +1,16 @@
 #import global_variables
 #import bso_build
 #import bso_run
+#import bso_help
 
 case $1 in 
-    --help )
-        echo "Esta é a ajuda"
-    ;;
     build )
         build ${@:2}
     ;;
     run )
         run ${@:2}
     ;;
+    * )
+        full_help
+    ;;    
 esac

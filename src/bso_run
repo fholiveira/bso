@@ -1,6 +1,7 @@
 #import global_variables
 #import bso_output
 #import bso_build
+#import bso_help
 
 function build_temp_script() {
     local start_script=$1
@@ -13,11 +14,32 @@ function run_temp_script() {
 }
 
 function run() {
-    local start_script=$1  
+    local start_script=''
+
+    case $1 in
+        --help | -h )
+            runner_help
+            exit 0
+        ;;
+
+        * )
+            test -z "$1" && runner_help && exit 0
+            test ! -f "$1" && echo "Script '$1' not found" && exit 0
+            start_script="$1"
+        ;;
+    esac
 
     case $2 in 
         --error-report )
             _error_report=true
+        ;;
+
+        '' )
+        ;;
+
+        * )
+            echo "Command '$2' not found"
+            exit 0
         ;;
     esac  
 
